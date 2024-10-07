@@ -12,7 +12,7 @@ final GoRouter router = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         return BlocProvider(
           create: (context) => AuthCubit(),
-          child: SignUpView(),
+          child: SignUp(),
         );
       },
     ),

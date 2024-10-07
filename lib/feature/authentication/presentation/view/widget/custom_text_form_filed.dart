@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CustomTextFormFiled extends StatelessWidget {
-const CustomTextFormFiled({super.key, required this.labelText, this.onChanged, required this.obscureText,  this.bottomPadding,  this.suffixIcon});
+ CustomTextFormFiled({super.key, required this.labelText, this.onChanged, required this.obscureText,  this.bottomPadding,  this.suffixIcon,this.prefixIcon});
 final String labelText;
 final Function(String)? onChanged;
 final bool obscureText;
 final double ? bottomPadding;
 final Widget? suffixIcon;
+Widget? prefixIcon;
   @override
   Widget build(BuildContext context) {
     final cubit=BlocProvider.of<AuthCubit>(context);
@@ -24,7 +25,9 @@ final Widget? suffixIcon;
         },
         obscureText:obscureText?cubit.obscureText:false,
         onChanged: onChanged,
+        
         decoration: InputDecoration(
+          prefixIcon:prefixIcon ,
           suffixIcon: suffixIcon,
           labelText:labelText ,
           border: OutlineInputBorder(

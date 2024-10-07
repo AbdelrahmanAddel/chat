@@ -23,4 +23,15 @@ final class LoadingToUploadImage extends AuthState {}
 
 final class FialedToGetImage extends AuthState {}
 
+final class SignInWithEmailAndPasswordSuccess extends AuthState {}
+
+final class FailedToSignInWithEmailAndPassword extends AuthState {
+  final String errorMessage;
+
+  FailedToSignInWithEmailAndPassword({required this.errorMessage});
+}
+
+final class LoadingToSignInWithEmailAndPassword extends AuthState {}
+
+
 

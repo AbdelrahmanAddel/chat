@@ -1,4 +1,5 @@
 import 'package:chat_app/core/widget/custom_show_toast.dart';
+import 'package:chat_app/feature/authentication/presentation/view/sign_in_view.dart';
 import 'package:chat_app/feature/authentication/presentation/view/widget/custom_matrial_buttom.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'custom_text_form_filed.dart';
 
 class SignUpBody extends StatelessWidget {
   SignUpBody({super.key});
-  
+
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -19,9 +20,16 @@ class SignUpBody extends StatelessWidget {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is CrateAccountSuccessStata) {
-          showToast(toastString: 'Success,Please Check Mail To Verify', colors: Colors.green);
+          showToast(
+            toastString: 'Success, Please Check Mail To Verify',
+            colors: Colors.green,
+          );
+          Navigator.push(context, MaterialPageRoute(builder: (builder)=>SignIn()));
         } else if (state is FailedToCeateAccountState) {
-          showToast(toastString: state.errorMessage, colors: Colors.red);
+          showToast(
+            toastString: state.errorMessage,
+            colors: Colors.red,
+          );
         }
       },
       builder: (context, state) {
@@ -30,6 +38,23 @@ class SignUpBody extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+             //!First Name
+              CustomTextFormFiled(
+                labelText: 'First Name',
+                obscureText: false,
+                onChanged: (firstName) {
+                  cubit.firstName = firstName;
+                },
+              ),
+             //!Last Name
+             CustomTextFormFiled(
+                labelText: 'Last Name',
+                obscureText: false,
+                onChanged: (lastName) {
+                  cubit.lastName = lastName;
+                },
+              ),
+             //!Email
               CustomTextFormFiled(
                 labelText: 'Email',
                 obscureText: false,
@@ -37,6 +62,7 @@ class SignUpBody extends StatelessWidget {
                   cubit.emailAddress = email;
                 },
               ),
+             //!Password       
               CustomTextFormFiled(
                 suffixIcon: MaterialButton(
                   onPressed: () {
@@ -47,13 +73,13 @@ class SignUpBody extends StatelessWidget {
                   ),
                 ),
                 labelText: 'Password',
-                obscureText: true,
+                obscureText: cubit.obscureText,
                 onChanged: (password) {
                   cubit.password = password;
                 },
               ),
               state is LoadingToCrateAccountStata
-                  ?const CupertinoActivityIndicator()
+                  ? const CupertinoActivityIndicator()
                   : CustomMaterialButton(
                       buttonText: 'Sign Up',
                       onPressed: () {

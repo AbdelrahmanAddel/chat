@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:chat_app/core/database/cache.dart';
+import 'package:chat_app/feature/profile/data/model/user_profile_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,10 +15,16 @@ class AuthCubit extends Cubit<AuthState> {
 
   String? emailAddress;
   String? password;
+  String? firstName;
+  String? lastName;
+  String?image;
+
   File? imageFile;
   bool obscureText = false;
+FirebaseFirestore firestore =FirebaseFirestore.instance;
+FirebaseAuth fireAuth=FirebaseAuth.instance;
 
-  Future<void> createUserWithEmailAndPassword() async {
+Future<void> createUserWithEmailAndPassword() async {
     try {
       emit(LoadingToCrateAccountStata());
 
@@ -23,7 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
         email: emailAddress!,
         password: password!,
       );
-
+      await addUserDataToFireStore(userId: fireAuth.currentUser!.uid);
       await verfiyEmail();
       emit(CrateAccountSuccessStata());
     } on FirebaseAuthException catch (e) {
@@ -35,6 +44,10 @@ class AuthCubit extends Cubit<AuthState> {
         emit(FailedToCeateAccountState(errorMessage: e.code));
       }
     } catch (e) {
+      print('/////////////');
+      print(e.toString());
+      print('/////////////');
+
       emit(FailedToCeateAccountState(errorMessage: e.toString()));
     }
   }
@@ -67,5 +80,39 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> uploadImageToFireStore() async {
     Reference reference = FirebaseStorage.instance.ref(basename(imageFile!.path));
     await reference.putFile(imageFile!);
+    image= await reference.getDownloadURL();
   }
+
+  Future<void> addUserDataToFireStore({required String userId})async{
+ await Cache.setValue(key: 'userId', value: fireAuth.currentUser?.uid);
+ UserProfileModel model=UserProfileModel(email: emailAddress!, firstName: firstName!, image: image, lastName: lastName!);
+  await firestore.collection('users').doc(userId).set(
+    model.userProfileModelToJson()
+);
+}
+
+
+Future<void> signInWithEmailAndPassword()async{
+try {
+   emit(LoadingToSignInWithEmailAndPassword());
+   await fireAuth.signInWithEmailAndPassword(
+    email: emailAddress!,
+    password: password!
+  );
+ emit(SignInWithEmailAndPasswordSuccess());
+} 
+on FirebaseAuthException catch (e) {
+  if (e.code == 'user-not-found') {
+    print('No user found for that email.');
+    emit(FailedToSignInWithEmailAndPassword(errorMessage: 'No user found for that email.'));
+  } else if (e.code == 'wrong-password') {
+    print('Wrong password provided for that user.');
+    emit(FailedToSignInWithEmailAndPassword(errorMessage: 'Wrong password provided for that user.'));
+  }
+  else{
+    emit(FailedToSignInWithEmailAndPassword(errorMessage: e.code));
+  }
+}
+
+}
 }
